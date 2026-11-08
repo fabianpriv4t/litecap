@@ -1,0 +1,29 @@
+#include <winres.h>
+#pragma code_page(65001)
+
+// Manifest: Common Controls v6, DPI-Bewusstsein, Windows-10/11-Kompatibilität
+1 RT_MANIFEST "litecap.manifest"
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 0,1,0,0
+ PRODUCTVERSION 0,1,0,0
+ FILEFLAGSMASK 0x3fL
+ FILEOS VOS_NT_WINDOWS32
+ FILETYPE VFT_APP
+BEGIN
+  BLOCK "StringFileInfo"
+  BEGIN
+    BLOCK "040704b0"
+    BEGIN
+      VALUE "FileDescription", "LiteCap – ressourcenschonende Bildschirmaufnahme"
+      VALUE "FileVersion", "0.1.0"
+      VALUE "ProductName", "LiteCap"
+      VALUE "ProductVersion", "0.1.0"
+      VALUE "OriginalFilename", "litecap.exe"
+    END
+  END
+  BLOCK "VarFileInfo"
+  BEGIN
+    VALUE "Translation", 0x0407, 1200
+  END
+END

@@ -1,0 +1,297 @@
+<Window x:Class="LiteCap.Settings.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:LiteCap.Settings"
+        Title="LiteCap – Einstellungen" Width="860" Height="680" MinWidth="640" MinHeight="480"
+        WindowStartupLocation="CenterScreen" Loaded="OnLoaded">
+  <DockPanel>
+    <!-- Fußleiste -->
+    <Border DockPanel.Dock="Bottom" Padding="16,10" BorderThickness="0,1,0,0"
+            BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}">
+      <DockPanel>
+        <TextBlock x:Name="StatusText" VerticalAlignment="Center" Style="{StaticResource Hint}" Margin="0"/>
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+          <Button Content="Abbrechen" Width="110" Margin="0,0,8,0" Click="OnCancel"/>
+          <Button Content="Übernehmen" Width="110" Margin="0,0,8,0" Click="OnApply"/>
+          <Button Content="Speichern" Width="110" Click="OnSave" IsDefault="True"
+                  Style="{DynamicResource AccentButtonStyle}"/>
+        </StackPanel>
+      </DockPanel>
+    </Border>
+
+    <TabControl x:Name="Tabs" TabStripPlacement="Left" Padding="20,12" BorderThickness="0">
+
+      <!-- ===================== Aufnahme ===================== -->
+      <TabItem Header="Aufnahme">
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+          <StackPanel MaxWidth="560" HorizontalAlignment="Left">
+            <TextBlock Text="Aufnahmequelle" Style="{StaticResource Section}"/>
+            <RadioButton x:Name="SrcMonitor" Content="Ganzer Bildschirm / Monitor" GroupName="src" Checked="OnSourceChanged"/>
+            <ComboBox x:Name="MonitorList" Margin="28,6,0,10" MinWidth="320" HorizontalAlignment="Left"/>
+            <RadioButton x:Name="SrcWindow" Content="Einzelnes Fenster" GroupName="src" Checked="OnSourceChanged"/>
+            <StackPanel x:Name="WindowPanel" Margin="28,6,0,0">
+              <TextBlock Text="Fenstertitel enthält" Style="{StaticResource Label}" Margin="0,0,0,4"/>
+              <ComboBox x:Name="WindowTitle" IsEditable="True" MinWidth="320" HorizontalAlignment="Left"
+                        SelectionChanged="OnWindowPicked"/>
+              <TextBlock Text="oder Programm (z. B. game.exe)" Style="{StaticResource Label}"/>
+              <TextBox x:Name="WindowExe" MinWidth="320" HorizontalAlignment="Left"/>
+              <TextBlock Style="{StaticResource Hint}"
+                         Text="Das Fenster wird beim Start der Aufnahme bzw. des Replay-Puffers gesucht. Wird es geschlossen, endet die Aufnahme."/>
+            </StackPanel>
+            <CheckBox x:Name="CaptureCursor" Content="Mauszeiger aufnehmen" Margin="0,12,0,0"/>
+          </StackPanel>
+        </ScrollViewer>
+      </TabItem>
+
+      <!-- ===================== Video ===================== -->
+      <TabItem Header="Video">
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+          <StackPanel MaxWidth="560" HorizontalAlignment="Left">
+            <TextBlock Text="Video" Style="{StaticResource Section}"/>
+            <TextBlock Text="Codec" Style="{StaticResource Label}"/>
+            <ComboBox x:Name="Codec" Width="320" HorizontalAlignment="Left" SelectionChanged="OnCodecChanged">
+              <ComboBoxItem Tag="h264" Content="H.264 (maximale Kompatibilität)"/>
+              <ComboBoxItem Tag="hevc" Content="HEVC / H.265 (kleinere Dateien)"/>
+              <ComboBoxItem Tag="av1" Content="AV1 (am kleinsten)"/>
+            </ComboBox>
+            <TextBlock x:Name="CodecHint" Style="{StaticResource Hint}"/>
+
+            <TextBlock Text="Encoder" Style="{StaticResource Label}"/>
+            <ComboBox x:Name="Encoder" Width="320" HorizontalAlignment="Left" SelectionChanged="OnCodecChanged">
+              <ComboBoxItem Tag="auto" Content="Automatisch (empfohlen)"/>
+              <ComboBoxItem Tag="nvenc" Content="NVIDIA NVENC"/>
+              <ComboBoxItem Tag="amf" Content="AMD AMF"/>
+              <ComboBoxItem Tag="qsv" Content="Intel Quick Sync"/>
+              <ComboBoxItem Tag="x264" Content="Software (x264) – hohe CPU-Last"/>
+            </ComboBox>
+            <TextBlock x:Name="EncoderHint" Style="{StaticResource Hint}" Text="Verfügbarkeit wird geprüft …"/>
+
+            <Grid>
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="16"/>
+                <ColumnDefinition Width="*"/>
+              </Grid.ColumnDefinitions>
+              <StackPanel>
+                <TextBlock Text="Bildrate" Style="{StaticResource Label}"/>
+                <ComboBox x:Name="Fps">
+                  <ComboBoxItem Tag="30" Content="30 fps"/>
+                  <ComboBoxItem Tag="60" Content="60 fps"/>
+                  <ComboBoxItem Tag="120" Content="120 fps"/>
+                </ComboBox>
+              </StackPanel>
+              <StackPanel Grid.Column="2">
+                <TextBlock Text="Auflösung" Style="{StaticResource Label}"/>
+                <ComboBox x:Name="Resolution">
+                  <ComboBoxItem Tag="0x0" Content="Wie die Quelle"/>
+                  <ComboBoxItem Tag="3840x2160" Content="3840 × 2160 (4K)"/>
+                  <ComboBoxItem Tag="2560x1440" Content="2560 × 1440"/>
+                  <ComboBoxItem Tag="1920x1080" Content="1920 × 1080"/>
+                  <ComboBoxItem Tag="1280x720" Content="1280 × 720"/>
+                </ComboBox>
+              </StackPanel>
+            </Grid>
+
+            <TextBlock Text="Qualität" Style="{StaticResource Label}"/>
+            <ComboBox x:Name="RateControl" Width="320" HorizontalAlignment="Left" SelectionChanged="OnRateControlChanged">
+              <ComboBoxItem Tag="vbr" Content="Variable Bitrate (empfohlen)"/>
+              <ComboBoxItem Tag="cbr" Content="Konstante Bitrate"/>
+              <ComboBoxItem Tag="cqp" Content="Konstante Qualität"/>
+            </ComboBox>
+            <StackPanel x:Name="BitratePanel">
+              <TextBlock x:Name="BitrateLabel" Style="{StaticResource Label}"/>
+              <Slider x:Name="Bitrate" Minimum="2" Maximum="100" TickFrequency="1" IsSnapToTickEnabled="True"
+                      ValueChanged="OnBitrateChanged"/>
+              <TextBlock Style="{StaticResource Hint}" Text="Richtwerte: 1080p60 15–25 Mbit/s, 1440p60 25–40, 4K60 40–80. HEVC/AV1 kommen mit etwa 30 % weniger aus."/>
+            </StackPanel>
+            <StackPanel x:Name="QualityPanel">
+              <TextBlock x:Name="QualityLabel" Style="{StaticResource Label}"/>
+              <Slider x:Name="Quality" Minimum="15" Maximum="35" TickFrequency="1" IsSnapToTickEnabled="True"
+                      IsDirectionReversed="True" ValueChanged="OnQualityChanged"/>
+              <TextBlock Style="{StaticResource Hint}" Text="Links = kleinere Dateien, rechts = bessere Qualität. Die Dateigröße hängt stark vom Bildinhalt ab."/>
+            </StackPanel>
+            <CheckBox x:Name="Av1Idle" Content="AV1-Umwandlung erst starten, wenn kein Spiel im Vollbild läuft" Margin="0,8,0,0"/>
+          </StackPanel>
+        </ScrollViewer>
+      </TabItem>
+
+      <!-- ===================== Audio ===================== -->
+      <TabItem Header="Audio">
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+          <StackPanel MaxWidth="560" HorizontalAlignment="Left">
+            <TextBlock Text="Audio" Style="{StaticResource Section}"/>
+            <CheckBox x:Name="AudioSystem" Content="System-Ton aufnehmen (alles, was über die Lautsprecher läuft)"/>
+            <CheckBox x:Name="AudioMic" Content="Mikrofon aufnehmen" Margin="0,8,0,0"/>
+            <ComboBox x:Name="MicList" Margin="28,6,0,0" Width="380" HorizontalAlignment="Left"/>
+            <CheckBox x:Name="SeparateTracks" Content="System und Mikrofon als getrennte Tonspuren speichern" Margin="0,12,0,0"/>
+            <TextBlock Style="{StaticResource Hint}" Margin="28,2,0,10"
+                       Text="Praktisch für den Schnitt. YouTube verwendet nur die erste Tonspur – für Uploads ggf. ausschalten (dann wird gemischt)."/>
+            <TextBlock Text="Audio-Bitrate" Style="{StaticResource Label}"/>
+            <ComboBox x:Name="AudioBitrate" Width="200" HorizontalAlignment="Left">
+              <ComboBoxItem Tag="128" Content="128 kbit/s"/>
+              <ComboBoxItem Tag="160" Content="160 kbit/s"/>
+              <ComboBoxItem Tag="192" Content="192 kbit/s"/>
+              <ComboBoxItem Tag="256" Content="256 kbit/s"/>
+              <ComboBoxItem Tag="320" Content="320 kbit/s"/>
+            </ComboBox>
+          </StackPanel>
+        </ScrollViewer>
+      </TabItem>
+
+      <!-- ===================== Replay ===================== -->
+      <TabItem Header="Instant Replay">
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+          <StackPanel MaxWidth="560" HorizontalAlignment="Left">
+            <TextBlock Text="Instant Replay" Style="{StaticResource Section}"/>
+            <CheckBox x:Name="ReplayOnLaunch" Content="Replay-Puffer beim Start von LiteCap aktivieren"/>
+            <TextBlock x:Name="ReplayLabel" Style="{StaticResource Label}"/>
+            <Slider x:Name="ReplaySeconds" Minimum="30" Maximum="600" TickFrequency="30" IsSnapToTickEnabled="True"
+                    ValueChanged="OnReplayChanged"/>
+            <TextBlock x:Name="ReplayHint" Style="{StaticResource Hint}"/>
+            <TextBlock Text="Ordner für die Pufferdatei" Style="{StaticResource Label}"/>
+            <DockPanel>
+              <Button DockPanel.Dock="Right" Content="Durchsuchen …" Margin="8,0,0,0" Click="OnBrowseReplayDir"/>
+              <TextBox x:Name="ReplayDir"/>
+            </DockPanel>
+            <TextBlock Style="{StaticResource Hint}"
+                       Text="Leer = %LOCALAPPDATA%\LiteCap\replay. Am besten eine SSD. Die Datei wird beim Beenden automatisch gelöscht."/>
+          </StackPanel>
+        </ScrollViewer>
+      </TabItem>
+
+      <!-- ===================== Ausgabe ===================== -->
+      <TabItem Header="Ausgabe">
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+          <StackPanel MaxWidth="560" HorizontalAlignment="Left">
+            <TextBlock Text="Ausgabe" Style="{StaticResource Section}"/>
+            <TextBlock Text="Aufnahmen und Clips …" Style="{StaticResource Label}" Margin="0,0,0,4"/>
+            <RadioButton x:Name="ModeLocal" Content="lokal speichern" GroupName="mode"/>
+            <RadioButton x:Name="ModeYouTube" Content="direkt auf YouTube hochladen (lokale Datei danach löschen)" GroupName="mode" Margin="0,4,0,0"/>
+            <RadioButton x:Name="ModeBoth" Content="beides: lokal speichern und hochladen" GroupName="mode" Margin="0,4,0,0"/>
+            <CheckBox x:Name="DeleteAfterUpload" Content="Nach erfolgreichem Upload lokale Datei löschen (Papierkorb)" Margin="28,6,0,0"/>
+
+            <TextBlock Text="Zielordner" Style="{StaticResource Label}"/>
+            <DockPanel>
+              <Button DockPanel.Dock="Right" Content="Durchsuchen …" Margin="8,0,0,0" Click="OnBrowseOutput"/>
+              <TextBox x:Name="OutputFolder"/>
+            </DockPanel>
+            <TextBlock Text="Dateiformat" Style="{StaticResource Label}"/>
+            <ComboBox x:Name="Container" Width="320" HorizontalAlignment="Left">
+              <ComboBoxItem Tag="mp4" Content="MP4 (überall abspielbar)"/>
+              <ComboBoxItem Tag="mkv" Content="MKV"/>
+            </ComboBox>
+            <TextBlock Text="Dateiname" Style="{StaticResource Label}"/>
+            <TextBox x:Name="FileNamePattern" TextChanged="OnPatternChanged"/>
+            <TextBlock x:Name="PatternPreview" Style="{StaticResource Hint}"/>
+            <TextBlock Text="Mindestens frei lassen (MB)" Style="{StaticResource Label}"/>
+            <TextBox x:Name="MinFree" Width="120" HorizontalAlignment="Left"/>
+            <TextBlock Style="{StaticResource Hint}" Text="Unterhalb dieser Grenze startet keine Aufnahme; bei der Hälfte wird eine laufende Aufnahme sauber beendet."/>
+          </StackPanel>
+        </ScrollViewer>
+      </TabItem>
+
+      <!-- ===================== YouTube ===================== -->
+      <TabItem Header="YouTube">
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+          <StackPanel MaxWidth="560" HorizontalAlignment="Left">
+            <TextBlock Text="YouTube" Style="{StaticResource Section}"/>
+            <TextBlock Style="{StaticResource Hint}"
+                       Text="Benötigt ein eigenes Google-Cloud-Projekt mit aktivierter YouTube Data API v3 und einer OAuth-Client-ID vom Typ „Desktop-App“ (Anleitung: docs\YOUTUBE.md)."/>
+            <TextBlock Text="OAuth-Client-ID" Style="{StaticResource Label}"/>
+            <TextBox x:Name="ClientId"/>
+            <TextBlock Text="OAuth-Client-Secret" Style="{StaticResource Label}"/>
+            <PasswordBox x:Name="ClientSecret"/>
+            <TextBlock x:Name="SecretHint" Style="{StaticResource Hint}"/>
+            <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+              <Button x:Name="ConnectButton" Content="Mit YouTube verbinden" Click="OnConnect" Margin="0,0,8,0"/>
+              <Button x:Name="DisconnectButton" Content="Trennen" Click="OnDisconnect"/>
+              <TextBlock x:Name="ConnectionState" VerticalAlignment="Center" Margin="12,0,0,0"/>
+            </StackPanel>
+
+            <TextBlock Text="Titel" Style="{StaticResource Label}"/>
+            <TextBox x:Name="TitleTemplate"/>
+            <TextBlock Style="{StaticResource Hint}" Text="Platzhalter: {date} {time} {source} {type}"/>
+            <TextBlock Text="Beschreibung" Style="{StaticResource Label}"/>
+            <TextBox x:Name="Description" AcceptsReturn="True" TextWrapping="Wrap" MinHeight="70"/>
+            <TextBlock Text="Tags (durch Komma getrennt)" Style="{StaticResource Label}"/>
+            <TextBox x:Name="Tags"/>
+            <Grid>
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="16"/>
+                <ColumnDefinition Width="*"/>
+              </Grid.ColumnDefinitions>
+              <StackPanel>
+                <TextBlock Text="Sichtbarkeit" Style="{StaticResource Label}"/>
+                <ComboBox x:Name="Privacy">
+                  <ComboBoxItem Tag="private" Content="Privat"/>
+                  <ComboBoxItem Tag="unlisted" Content="Nicht gelistet"/>
+                  <ComboBoxItem Tag="public" Content="Öffentlich"/>
+                </ComboBox>
+              </StackPanel>
+              <StackPanel Grid.Column="2">
+                <TextBlock Text="Kategorie" Style="{StaticResource Label}"/>
+                <ComboBox x:Name="Category">
+                  <ComboBoxItem Tag="20" Content="Gaming"/>
+                  <ComboBoxItem Tag="22" Content="Menschen &amp; Blogs"/>
+                  <ComboBoxItem Tag="24" Content="Unterhaltung"/>
+                  <ComboBoxItem Tag="27" Content="Bildung"/>
+                  <ComboBoxItem Tag="28" Content="Wissenschaft &amp; Technik"/>
+                </ComboBox>
+              </StackPanel>
+            </Grid>
+            <TextBlock Text="Upload-Bandbreite begrenzen (kbit/s, 0 = unbegrenzt)" Style="{StaticResource Label}"/>
+            <TextBox x:Name="MaxUpload" Width="120" HorizontalAlignment="Left"/>
+
+            <TextBlock Text="Upload-Warteschlange" Style="{StaticResource Label}" Margin="0,18,0,4"/>
+            <ListView x:Name="UploadList" MinHeight="90" MaxHeight="220">
+              <ListView.View>
+                <GridView>
+                  <GridViewColumn Header="Datei" DisplayMemberBinding="{Binding File}" Width="230"/>
+                  <GridViewColumn Header="Status" DisplayMemberBinding="{Binding State}" Width="120"/>
+                  <GridViewColumn Header="Link / Fehler" DisplayMemberBinding="{Binding Info}" Width="190"/>
+                </GridView>
+              </ListView.View>
+            </ListView>
+          </StackPanel>
+        </ScrollViewer>
+      </TabItem>
+
+      <!-- ===================== Hotkeys ===================== -->
+      <TabItem Header="Hotkeys">
+        <StackPanel MaxWidth="560" HorizontalAlignment="Left">
+          <TextBlock Text="Tastenkürzel" Style="{StaticResource Section}"/>
+          <TextBlock Style="{StaticResource Hint}" Text="In ein Feld klicken und die Kombination drücken. Entf entfernt ein Kürzel. Alt+F9/Alt+F10 sind oft von der NVIDIA App belegt."/>
+          <TextBlock Text="Aufnahme starten/stoppen" Style="{StaticResource Label}"/>
+          <local:HotkeyBox x:Name="HkRecord" Width="260" HorizontalAlignment="Left"/>
+          <TextBlock Text="Replay-Clip speichern" Style="{StaticResource Label}"/>
+          <local:HotkeyBox x:Name="HkSave" Width="260" HorizontalAlignment="Left"/>
+          <TextBlock Text="Replay-Puffer an/aus" Style="{StaticResource Label}"/>
+          <local:HotkeyBox x:Name="HkReplay" Width="260" HorizontalAlignment="Left"/>
+        </StackPanel>
+      </TabItem>
+
+      <!-- ===================== Allgemein ===================== -->
+      <TabItem Header="Allgemein">
+        <StackPanel MaxWidth="560" HorizontalAlignment="Left">
+          <TextBlock Text="Allgemein" Style="{StaticResource Section}"/>
+          <CheckBox x:Name="Autostart" Content="Mit Windows starten"/>
+          <CheckBox x:Name="Notifications" Content="Benachrichtigungen anzeigen (Fehler werden immer gemeldet)" Margin="0,8,0,0"/>
+          <CheckBox x:Name="NotificationSound" Content="Benachrichtigungston" Margin="28,6,0,0"/>
+          <TextBlock Text="Protokoll" Style="{StaticResource Label}"/>
+          <ComboBox x:Name="LogLevel" Width="200" HorizontalAlignment="Left">
+            <ComboBoxItem Tag="error" Content="Nur Fehler"/>
+            <ComboBoxItem Tag="warn" Content="Warnungen"/>
+            <ComboBoxItem Tag="info" Content="Normal"/>
+            <ComboBoxItem Tag="debug" Content="Ausführlich"/>
+          </ComboBox>
+          <StackPanel Orientation="Horizontal" Margin="0,16,0,0">
+            <Button Content="Protokoll öffnen" Click="OnOpenLog" Margin="0,0,8,0"/>
+            <Button Content="Konfigurationsordner öffnen" Click="OnOpenConfigDir"/>
+          </StackPanel>
+          <TextBlock x:Name="CoreState" Style="{StaticResource Hint}" Margin="0,16,0,0"/>
+        </StackPanel>
+      </TabItem>
+    </TabControl>
+  </DockPanel>
+</Window>

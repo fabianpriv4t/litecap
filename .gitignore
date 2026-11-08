@@ -1,0 +1,7 @@
+/build/
+/out/
+/vcpkg_installed/
+/.vs/
+/settings/bin/
+/settings/obj/
+*.user

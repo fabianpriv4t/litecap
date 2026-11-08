@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Einstellungs-GUI von LiteCap. Läuft als eigener Prozess nur, solange das Fenster offen ist;
+       im Hintergrund belegt sie also weder RAM noch CPU. -->
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net9.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AssemblyName>litecap-settings</AssemblyName>
+    <RootNamespace>LiteCap.Settings</RootNamespace>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <!-- Fluent-Theme von WPF in .NET 9 ist noch als "experimentell" markiert -->
+    <NoWarn>$(NoWarn);WPF0001</NoWarn>
+    <InvariantGlobalization>false</InvariantGlobalization>
+    <SatelliteResourceLanguages>de</SatelliteResourceLanguages>
+    <Version>0.1.0</Version>
+  </PropertyGroup>
+
+</Project>
