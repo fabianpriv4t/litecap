@@ -76,6 +76,14 @@ HttpResponse Http::Request(const std::wstring& method, const std::wstring& url,
                                 WINHTTP_NO_REFERER, WINHTTP_DEFAULT_ACCEPT_TYPES,
                                 uc.nScheme == INTERNET_SCHEME_HTTPS ? WINHTTP_FLAG_SECURE : 0)};
   if (!req.h) ThrowNet("Anfrage anlegen");
+  // Keine automatischen Weiterleitungen: Googles resumable Upload antwortet mit 308 "Resume
+  // Incomplete" (ohne Location-Header). WinHTTP hält das sonst für "308 Permanent Redirect",
+  // versucht zu folgen und scheitert mit ERROR_WINHTTP_REDIRECT_FAILED (12156) – der Aufrufer
+  // muss den Status 308 selbst sehen.
+  DWORD redirectPolicy = WINHTTP_OPTION_REDIRECT_POLICY_NEVER;
+  if (!WinHttpSetOption(req.h, WINHTTP_OPTION_REDIRECT_POLICY, &redirectPolicy,
+                        sizeof(redirectPolicy)))
+    ThrowNet("Weiterleitungen abschalten");
 
   std::wstring hdr;
   for (const auto& [k, v] : headers) hdr += k + L": " + v + L"\r\n";
