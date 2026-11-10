@@ -28,7 +28,7 @@ Architektur: [docs/ARCHITEKTUR.md](docs/ARCHITEKTUR.md) · YouTube einrichten: [
 ## Bauen
 
 ```powershell
-cd C:\Users\Fabian\Documents\screencapture_tool
+cd C:\Users\%USER%\Documents\screencapture_tool
 .\build.cmd release
 ```
 
