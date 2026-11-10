@@ -26,8 +26,12 @@ Architektur: [docs/ARCHITEKTUR.md](docs/ARCHITEKTUR.md) · YouTube einrichten: [
 3. `litecap.exe` starten → Icon im Infobereich der Taskleiste (ggf. über ^ einblenden).
 
 Eine Installation ist nicht nötig: .NET und die Visual-C++-Laufzeit sind im ZIP enthalten.
-Alle Dateien müssen im selben Ordner bleiben. Die Programmdateien sind nicht signiert; bei der
-SmartScreen-Warnung „Weitere Informationen“ → „Trotzdem ausführen“ wählen.
+Die Ordnerstruktur muss erhalten bleiben (die Einstellungs-GUI liegt im Unterordner `settings`).
+Die Programmdateien sind nicht signiert; bei der SmartScreen-Warnung „Weitere Informationen“ →
+„Trotzdem ausführen“ wählen. Aus demselben Grund können Virenscanner – vor allem die
+Verhaltens-Heuristiken von Windows Defender – LiteCap fälschlich als Bedrohung einstufen: Bildschirm-
+und Tonaufnahme, Upload und Autostart ähneln dem Verhalten von Spionage-Software. Der komplette
+Quellcode ist hier einsehbar, die SHA256-Prüfsummen der Dateien stehen beim jeweiligen Release.
 
 **Systemvoraussetzungen:** Windows 10 1903 oder neuer, 64 Bit (Windows 11 empfohlen: kein gelber
 Aufnahmerahmen).
@@ -141,9 +145,16 @@ dotnet publish settings\LiteCapSettings.csproj -c Release -r win-x64 --self-cont
 ```
 
 So gebaut braucht die Einstellungs-GUI die .NET 9 Desktop Runtime. Für das Release-ZIP wird sie
-stattdessen mit `--self-contained true -p:IncludeNativeLibrariesForSelfExtract=true` gebaut, und
+stattdessen mit eigenem .NET in den Unterordner `settings` gebaut – bewusst als normale Dateien
+statt als selbstentpackende Einzeldatei, die Virenscanner gern als verdächtig einstufen:
+
+```powershell
+dotnet publish settings\LiteCapSettings.csproj -c Release -r win-x64 --self-contained true -p:DebugType=none -o <ZIP-Ordner>\settings
+```
+
 `msvcp140.dll`, `vcruntime140.dll` und `vcruntime140_1.dll` (aus `VC\Redist\MSVC\<Version>\x64\Microsoft.VC143.CRT`)
-liegen neben `litecap.exe`.
+liegen neben `litecap.exe`. Release-Builds am besten aus einem Ordner außerhalb des Benutzerprofils
+(z. B. `C:\litecap-build`) erstellen, sonst landen lokale Pfade samt Benutzername in der exe.
 
 ## Projektstruktur
 

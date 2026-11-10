@@ -15,11 +15,15 @@ BEGIN
   BEGIN
     BLOCK "040704b0"
     BEGIN
+      VALUE "CompanyName", "LiteCap (github.com/fabianpriv4t/litecap)"
       VALUE "FileDescription", "LiteCap – ressourcenschonende Bildschirmaufnahme"
       VALUE "FileVersion", "0.1.0"
+      VALUE "InternalName", "litecap"
+      VALUE "LegalCopyright", "© 2026 fabianpriv4t – GNU GPL v2 oder neuer"
       VALUE "ProductName", "LiteCap"
       VALUE "ProductVersion", "0.1.0"
       VALUE "OriginalFilename", "litecap.exe"
+      VALUE "Comments", "Open Source: https://github.com/fabianpriv4t/litecap"
     END
   END
   BLOCK "VarFileInfo"

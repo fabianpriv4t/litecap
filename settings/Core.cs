@@ -21,8 +21,18 @@ internal static class Core
     public static string DefaultVideoDir =>
         Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyVideos), "LiteCap");
 
-    /// <summary>litecap.exe liegt im selben Ordner wie diese GUI.</summary>
-    public static string Exe => Path.Combine(AppContext.BaseDirectory, "litecap.exe");
+    /// <summary>litecap.exe liegt im selben Ordner wie diese GUI oder – im Release-ZIP, wo die GUI
+    /// im Unterordner "settings" liegt – eine Ebene darüber.</summary>
+    public static string Exe
+    {
+        get
+        {
+            string here = Path.Combine(AppContext.BaseDirectory, "litecap.exe");
+            if (File.Exists(here)) return here;
+            string parent = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "litecap.exe"));
+            return File.Exists(parent) ? parent : here;
+        }
+    }
 
     /// <summary>Führt "litecap.exe &lt;args&gt;" aus und liefert (Exitcode, stdout).</summary>
     public static async Task<(int Code, string Output)> RunAsync(string args, CancellationToken ct = default)

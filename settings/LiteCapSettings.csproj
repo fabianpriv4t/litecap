@@ -16,6 +16,11 @@
     <InvariantGlobalization>false</InvariantGlobalization>
     <SatelliteResourceLanguages>de</SatelliteResourceLanguages>
     <Version>0.1.0</Version>
+    <Product>LiteCap</Product>
+    <AssemblyTitle>LiteCap – Einstellungen</AssemblyTitle>
+    <Description>Einstellungen für LiteCap (ressourcenschonende Bildschirmaufnahme)</Description>
+    <Company>LiteCap (github.com/fabianpriv4t/litecap)</Company>
+    <Copyright>© 2026 fabianpriv4t – GNU GPL v2 oder neuer</Copyright>
   </PropertyGroup>
 
 </Project>

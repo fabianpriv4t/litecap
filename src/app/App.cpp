@@ -534,8 +534,11 @@ void App::OpenOutputFolder() {
 }
 
 void App::OpenSettings() {
-  fs::path gui = paths::ExeDir() / L"litecap-settings.exe";
+  // Neben litecap.exe (eigener Build) oder im Unterordner "settings" (Release-ZIP: GUI mit
+  // eigenem .NET als normale Dateien statt selbstentpackender Einzeldatei)
   std::error_code ec;
+  fs::path gui = paths::ExeDir() / L"litecap-settings.exe";
+  if (!fs::exists(gui, ec)) gui = paths::ExeDir() / L"settings" / L"litecap-settings.exe";
   if (fs::exists(gui, ec)) {
     // Die GUI ist ein eigener Prozess: Sie belegt nur Ressourcen, solange sie offen ist.
     ShellExecuteW(nullptr, L"open", gui.c_str(), nullptr, nullptr, SW_SHOWNORMAL);
