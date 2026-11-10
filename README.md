@@ -30,8 +30,25 @@ Alle Dateien müssen im selben Ordner bleiben. Die Programmdateien sind nicht si
 SmartScreen-Warnung „Weitere Informationen“ → „Trotzdem ausführen“ wählen.
 
 **Systemvoraussetzungen:** Windows 10 1903 oder neuer, 64 Bit (Windows 11 empfohlen: kein gelber
-Aufnahmerahmen). Hardware-Encoding über NVIDIA (NVENC), AMD (AMF) oder Intel (Quick Sync); ohne
-passende GPU wird x264 auf der CPU verwendet.
+Aufnahmerahmen).
+
+### Unterstützte Grafikkarten
+
+LiteCap nimmt mit der Grafikkarte auf, an der der Monitor hängt, und nutzt deren Hardware-Encoder –
+das Bild bleibt dabei auf der GPU, die CPU-Last liegt unter 1 %. Fehlt dieser Encoder (oder ist in
+den Einstellungen einer gewählt, den der PC nicht hat), probiert LiteCap automatisch die anderen
+Hardware-Encoder und erst ganz zum Schluss x264 auf der CPU. Laptops mit zwei Grafikchips
+funktionieren genauso.
+
+| Hersteller | Encoder | Voraussetzung |
+|---|---|---|
+| NVIDIA | NVENC | GeForce GTX 900 oder neuer, Treiber 531.61 oder neuer |
+| AMD | AMF | Radeon-Grafikkarte oder Ryzen mit integrierter Grafik, aktueller Treiber |
+| Intel | Quick Sync | Intel HD/UHD/Iris Xe, Core Ultra oder Arc, aktueller Treiber |
+| ohne passende GPU | x264 (CPU) | läuft überall, belastet die CPU aber deutlich stärker |
+
+AV1 direkt in Hardware können GeForce RTX 40/50, Radeon RX 7000/9000 sowie Intel Arc und Core Ultra.
+Alle anderen GPUs nehmen in HEVC auf; die Umwandlung in AV1 passiert danach automatisch im Leerlauf.
 
 ## Starten und bedienen
 

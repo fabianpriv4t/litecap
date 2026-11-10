@@ -1,5 +1,7 @@
 #include "encode/EncoderInfo.h"
 
+#include <algorithm>
+
 namespace litecap {
 
 const char* CodecName(Codec c) {
@@ -53,13 +55,12 @@ std::vector<EncoderChoice> EncoderCandidates(const std::string& codecSetting,
   if (encoderSetting == "nvenc") hw = {Backend::NVENC};
   else if (encoderSetting == "amf") hw = {Backend::AMF};
   else if (encoderSetting == "qsv") hw = {Backend::QSV};
-  else if (encoderSetting == "x264") hw = {};
-  else {
-    // auto: Encoder der Capture-GPU zuerst (Zero-Copy), danach die anderen
-    Backend first = VendorBackend(captureGpu);
-    hw.push_back(first);
-    for (Backend b : {Backend::NVENC, Backend::AMF, Backend::QSV})
-      if (b != first) hw.push_back(b);
+  if (encoderSetting != "x264") {
+    // auto – bzw. Rückfall, wenn der gewählte Encoder auf diesem PC fehlt (z. B. Einstellungen
+    // von einem anderen Rechner): Encoder der Capture-GPU zuerst (Zero-Copy), danach die anderen,
+    // erst ganz zum Schluss x264 auf der CPU
+    for (Backend b : {VendorBackend(captureGpu), Backend::NVENC, Backend::AMF, Backend::QSV})
+      if (std::find(hw.begin(), hw.end(), b) == hw.end()) hw.push_back(b);
   }
 
   std::vector<EncoderChoice> list;

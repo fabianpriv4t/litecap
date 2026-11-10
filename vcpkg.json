@@ -21,5 +21,9 @@
         "svt-av1"
       ]
     }
+  ],
+  "$ffnvcodec": "NVENC-API 12.1 läuft ab NVIDIA-Treiber 531.61 (auch GTX 900/10, deren letzter Treiber die 580er-Reihe ist). 13.x verlangt Treiber 570 bzw. 610+.",
+  "overrides": [
+    { "name": "ffnvcodec", "version": "12.1.14.0" }
   ]
 }
