@@ -18,17 +18,29 @@ Google-Cloud-Projekt mit einer OAuth-Client-ID. Das dauert einmalig etwa 10 Minu
 ## 3. OAuth-Zustimmungsbildschirm („Google Auth Platform“)
 
 1. Menü **APIs und Dienste → OAuth-Zustimmungsbildschirm** (bzw. **Google Auth Platform**).
-2. **Branding:** App-Name `LiteCap`, Support-E-Mail = deine Adresse, Kontakt-E-Mail eintragen.
+2. **Branding:**
+   - App-Name `LiteCap`, Support-E-Mail = deine Adresse, Kontakt-E-Mail des Entwicklers eintragen.
+   - **Startseite der Anwendung:** `https://fabianpriv4t.github.io/litecap/`
+   - **Link zur Datenschutzerklärung:** `https://fabianpriv4t.github.io/litecap/datenschutz.html`
+   - **Autorisierte Domains:** `fabianpriv4t.github.io`
+   - **Logo leer lassen** – mit Logo verlangt Google eine Überprüfung der App.
+   - Nutzungsbedingungen sind optional.
+
+   Startseite und Datenschutzerklärung braucht Google für den Status „In Produktion“ (Schritt 5);
+   beide Seiten gehören zu LiteCap und dürfen in jedem eigenen Projekt eingetragen werden.
 3. **Zielgruppe:** Nutzertyp **Extern**.
 4. **Datenzugriff → Bereiche hinzufügen:** `https://www.googleapis.com/auth/youtube.upload`
    (Anzeigename „Videos auf YouTube verwalten“ / „youtube.upload“).
 5. Veröffentlichungsstatus – zwei Möglichkeiten:
    - **Testen** (Standard): unter **Testnutzer** dein Google-Konto hinzufügen.
      ⚠ Im Testmodus laufen Refresh-Tokens nach **7 Tagen** ab → dann in LiteCap neu verbinden.
-   - **In Produktion** (empfohlen für Dauerbetrieb): „App veröffentlichen“. Ohne Google-Prüfung
-     erscheint bei der Anmeldung ein Warnhinweis („Google hat diese App nicht überprüft“), die
-     Anmeldung bleibt aber dauerhaft gültig. Für den Eigengebrauch ist das unproblematisch
-     (Grenze: 100 Nutzer).
+   - **In Produktion** (empfohlen für Dauerbetrieb): unter **Zielgruppe** → „App veröffentlichen“
+     (setzt die Branding-Angaben aus Schritt 2 voraus). Den Hinweis auf eine nötige Überprüfung
+     einfach bestätigen: Ohne Google-Prüfung erscheint bei der Anmeldung ein Warnhinweis („Google
+     hat diese App nicht überprüft“), die Anmeldung bleibt aber dauerhaft gültig. Für den
+     Eigengebrauch ist das unproblematisch (Grenze: 100 Nutzer).
+     Warst du vorher im Testmodus verbunden: in LiteCap einmal **Trennen** und neu verbinden,
+     sonst läuft das alte Token trotzdem nach 7 Tagen ab.
 
 ## 4. OAuth-Client-ID erstellen
 

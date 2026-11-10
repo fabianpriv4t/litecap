@@ -16,7 +16,8 @@ NVIDIA ShadowPlay: Instant Replay, Hardware-Encoding, direkter YouTube-Upload.
 Gemessen neben einem GPU-limitierten Spiel: **0,18 % CPU, 90 MB Working Set** im Replay-Betrieb,
 60 fps ohne ausgelassene Frames → [docs/PERFORMANCE.md](docs/PERFORMANCE.md)
 
-Architektur: [docs/ARCHITEKTUR.md](docs/ARCHITEKTUR.md) · YouTube einrichten: [docs/YOUTUBE.md](docs/YOUTUBE.md)
+Architektur: [docs/ARCHITEKTUR.md](docs/ARCHITEKTUR.md) · YouTube einrichten: [docs/YOUTUBE.md](docs/YOUTUBE.md) ·
+Website: <https://fabianpriv4t.github.io/litecap/> · [Datenschutzerklärung](https://fabianpriv4t.github.io/litecap/datenschutz.html)
 
 ## Download und Installation
 
