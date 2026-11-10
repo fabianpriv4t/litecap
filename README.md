@@ -18,30 +18,24 @@ Gemessen neben einem GPU-limitierten Spiel: **0,18 % CPU, 90 MB Working Set** im
 
 Architektur: [docs/ARCHITEKTUR.md](docs/ARCHITEKTUR.md) · YouTube einrichten: [docs/YOUTUBE.md](docs/YOUTUBE.md)
 
-## Voraussetzungen
+## Download und Installation
 
-- Windows 10 1903 oder neuer (Windows 11 empfohlen: kein gelber Aufnahmerahmen)
-- Visual Studio 2022 mit Workload **„Desktopentwicklung mit C++“** (enthält CMake, Ninja, vcpkg)
-- .NET 9 SDK (für die Einstellungs-GUI)
-- Internetzugang beim ersten Build: vcpkg lädt und baut FFmpeg (einmalig ca. 20–40 min)
+1. **[LiteCap-win-x64.zip](https://github.com/fabianpriv4t/litecap/releases/latest/download/LiteCap-win-x64.zip)**
+   herunterladen (neueste Version; alle Versionen unter [Releases](https://github.com/fabianpriv4t/litecap/releases)).
+2. Das ZIP komplett in einen beliebigen Ordner entpacken – nicht direkt aus dem ZIP starten.
+3. `litecap.exe` starten → Icon im Infobereich der Taskleiste (ggf. über ^ einblenden).
 
-## Bauen
+Eine Installation ist nicht nötig: .NET und die Visual-C++-Laufzeit sind im ZIP enthalten.
+Alle Dateien müssen im selben Ordner bleiben. Die Programmdateien sind nicht signiert; bei der
+SmartScreen-Warnung „Weitere Informationen“ → „Trotzdem ausführen“ wählen.
 
-```powershell
-cd C:\Users\%USER%\Documents\screencapture_tool
-.\build.cmd release
-```
-
-`build.cmd` sucht Visual Studio selbst, baut den Kern (`litecap.exe`) und die GUI
-(`litecap-settings.exe`) nach `build\Release\`. Beide Dateien gehören in denselben Ordner.
-
-Manuell: in der „Developer PowerShell for VS 2022“ `cmake --preset x64` und
-`cmake --build --preset release`, danach
-`dotnet publish settings\LiteCapSettings.csproj -c Release -r win-x64 --self-contained false -p:PublishSingleFile=true -o build\Release`.
+**Systemvoraussetzungen:** Windows 10 1903 oder neuer, 64 Bit (Windows 11 empfohlen: kein gelber
+Aufnahmerahmen). Hardware-Encoding über NVIDIA (NVENC), AMD (AMF) oder Intel (Quick Sync); ohne
+passende GPU wird x264 auf der CPU verwendet.
 
 ## Starten und bedienen
 
-`build\Release\litecap.exe` starten → Icon im Infobereich (ggf. über ^ einblenden).
+`litecap.exe` starten → Icon im Infobereich (ggf. über ^ einblenden).
 
 | Standard-Hotkey | Aktion |
 |---|---|
@@ -95,6 +89,44 @@ Ungültige Werte werden beim Laden korrigiert und im Log vermerkt.
 | `litecap.exe --test-replay 30 40` | Replay-Selbsttest (Puffer füllen, Clip speichern) |
 | `litecap.exe --list-devices` | Monitore, Fenster, Mikrofone, Encoder als JSON (nutzt die GUI) |
 | `litecap.exe --youtube-login` / `--youtube-logout` | YouTube verbinden/trennen |
+
+## Selbst bauen
+
+Nur nötig, wenn du den Quellcode ändern willst – zum Benutzen reicht das Release-ZIP.
+
+**Voraussetzungen**
+
+- [Git](https://git-scm.com/download/win)
+- Visual Studio 2022 (Community reicht) mit Workload **„Desktopentwicklung mit C++“**
+  (enthält CMake, Ninja, vcpkg)
+- [.NET 9 SDK](https://dotnet.microsoft.com/download/dotnet/9.0) (für die Einstellungs-GUI)
+- Internetzugang beim ersten Build: vcpkg lädt und baut FFmpeg (einmalig ca. 20–40 min)
+
+**Bauen**
+
+```powershell
+git clone https://github.com/fabianpriv4t/litecap.git
+cd litecap
+.\build.cmd release
+```
+
+`build.cmd` sucht Visual Studio selbst, baut den Kern (`litecap.exe`) und die GUI
+(`litecap-settings.exe`) nach `build\Release\`. Beide Dateien gehören in denselben Ordner.
+
+**Manuell** (z. B. mit den reinen *Build Tools for Visual Studio 2022*, die `build.cmd` nicht findet):
+in der „Developer PowerShell for VS 2022“
+
+```powershell
+$env:VCPKG_ROOT = "<Visual-Studio-Ordner>\VC\vcpkg"   # falls nicht gesetzt
+cmake --preset x64
+cmake --build --preset release
+dotnet publish settings\LiteCapSettings.csproj -c Release -r win-x64 --self-contained false -p:PublishSingleFile=true -o build\Release
+```
+
+So gebaut braucht die Einstellungs-GUI die .NET 9 Desktop Runtime. Für das Release-ZIP wird sie
+stattdessen mit `--self-contained true -p:IncludeNativeLibrariesForSelfExtract=true` gebaut, und
+`msvcp140.dll`, `vcruntime140.dll` und `vcruntime140_1.dll` (aus `VC\Redist\MSVC\<Version>\x64\Microsoft.VC143.CRT`)
+liegen neben `litecap.exe`.
 
 ## Projektstruktur
 
