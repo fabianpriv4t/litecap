@@ -4,4 +4,5 @@
 /.vs/
 /settings/bin/
 /settings/obj/
+/settings/build/
 *.user
