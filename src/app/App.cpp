@@ -25,6 +25,8 @@ constexpr UINT_PTR kTimerConfigReload = 1;
 constexpr UINT_PTR kTimerRecordingWatch = 2;
 constexpr UINT_PTR kTimerStatus = 3;          // Tooltip (Replay/Upload) alle 5 s
 constexpr UINT_PTR kTimerReplayRestart = 4;
+constexpr UINT_PTR kTimerDisplayChange = 5;  // entprellt: Moduswechsel melden sich mehrfach
+constexpr UINT_PTR kTimerResume = 6;         // nach Standby: Session neu aufsetzen
 constexpr wchar_t kRunKey[] = L"Software\\Microsoft\\Windows\\CurrentVersion\\Run";
 constexpr wchar_t kRunValue[] = L"LiteCap";
 
@@ -114,6 +116,7 @@ bool App::Init() {
   StartConfigWatch();
   SetTimer(hwnd_, kTimerStatus, 5000, nullptr);
 
+  ReplayBuffer::RemoveStaleFiles(config_.ReplayBufferDir());
   if (config_.general.startReplayOnLaunch) StartReplay(/*notify=*/false);
   UpdateTray();
   log::Info("LiteCap {} gestartet", LITECAP_VERSION);
@@ -457,6 +460,37 @@ void App::StopReplay() {
   UpdateTray();
 }
 
+void App::RestartPipeline(const std::wstring& reason) {
+  const bool wasRecording = recording_;
+  const bool wasReplay = replayActive_;
+  if (!wasRecording && !wasReplay) return;
+  if (wasRecording)
+    StopRecording(reason + L" – die Aufnahme wird in einer neuen Datei fortgesetzt.");
+  if (replayActive_) StopReplay();  // replayWanted_ bleibt gesetzt
+  if (session_) {
+    session_->Stop();
+    session_.reset();
+  }
+  if (wasReplay) StartReplay(/*notify=*/false);
+  if (wasRecording) StartRecording();
+}
+
+void App::CheckCaptureTarget() {
+  if (!session_ || !session_->Running() || config_.capture.source != "monitor") return;
+  std::string err;
+  auto wanted = ResolveTarget(config_.capture, err);
+  if (!wanted) return;
+  const CaptureTarget& current = session_->Target();
+  if (wanted->monitor == current.monitor && wanted->deviceName == current.deviceName) {
+    log::Info("Bildschirm-Anordnung geändert – Aufnahmequelle unverändert ({}, {})",
+              WideToUtf8(current.name), WideToUtf8(current.deviceName));
+    return;
+  }
+  log::Info("Bildschirm-Anordnung geändert: Quelle {} → {} – Aufnahme wird neu gestartet",
+            WideToUtf8(current.deviceName), WideToUtf8(wanted->deviceName));
+  RestartPipeline(L"Bildschirm-Anordnung geändert");
+}
+
 void App::OnClipSaved(ClipResult* r) {
   std::unique_ptr<ClipResult> res(r);
   if (clipThread_.joinable()) clipThread_.join();
@@ -658,12 +692,36 @@ LRESULT App::WndProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) {
         if (replayWanted_ && !replayActive_) StartReplay(/*notify=*/true);
         return 0;
       }
+      if (wp == kTimerDisplayChange) {
+        KillTimer(hwnd, kTimerDisplayChange);
+        CheckCaptureTarget();
+        return 0;
+      }
+      if (wp == kTimerResume) {
+        KillTimer(hwnd, kTimerResume);
+        // Die QPC-Zeitbasis der Session ist über den Standby gesprungen → frisch aufsetzen
+        if (recording_ || replayActive_) {
+          log::Info("Aus dem Standby aufgewacht – Aufnahme wird neu gestartet");
+          RestartPipeline(L"Aus dem Standby aufgewacht");
+        }
+        return 0;
+      }
       if (wp == kTimerConfigReload) {
         KillTimer(hwnd, kTimerConfigReload);
         LoadConfig(false);
         ApplyConfig();
       }
       return 0;
+
+    case WM_DISPLAYCHANGE:
+      // Auflösung/Anordnung geändert (z. B. Spiel mit gestreckter Auflösung gestartet)
+      SetTimer(hwnd, kTimerDisplayChange, 2000, nullptr);
+      return 0;
+
+    case WM_POWERBROADCAST:
+      if (wp == PBT_APMRESUMEAUTOMATIC || wp == PBT_APMRESUMESUSPEND)
+        SetTimer(hwnd, kTimerResume, 3000, nullptr);
+      return TRUE;
 
     case WM_QUERYENDSESSION:
       return TRUE;

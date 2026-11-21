@@ -14,6 +14,7 @@ struct CaptureTarget {
   HMONITOR monitor = nullptr;  // gesetzt bei Monitor-Aufnahme
   HWND window = nullptr;       // gesetzt bei Fenster-Aufnahme
   std::wstring name;           // für Dateinamen ({source}) und Log
+  std::wstring deviceName;     // bei Monitoren: z. B. \\.\DISPLAY1 (erkennt Umsortieren)
   // Monitor, auf dem das Ziel liegt (bei Fenstern: der Monitor mit der größten Überlappung)
   HMONITOR HostMonitor() const;
 };

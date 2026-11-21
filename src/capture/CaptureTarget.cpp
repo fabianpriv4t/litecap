@@ -106,7 +106,7 @@ std::optional<CaptureTarget> ResolveTarget(const CaptureConfig& cfg, std::string
   size_t idx = static_cast<size_t>(cfg.monitorIndex);
   if (idx >= monitors.size()) idx = 0;  // Monitor abgesteckt → primären verwenden
   return CaptureTarget{monitors[idx].handle, nullptr,
-                       L"Monitor" + std::to_wstring(idx + 1)};
+                       L"Monitor" + std::to_wstring(idx + 1), monitors[idx].deviceName};
 }
 
 } // namespace litecap

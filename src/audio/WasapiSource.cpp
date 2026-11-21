@@ -18,6 +18,12 @@ namespace {
 constexpr REFERENCE_TIME kBufferDuration = 200'000;  // 20 ms in 100-ns-Einheiten
 constexpr int64_t kTolerance = WasapiSource::kSampleRate / 500;  // 2 ms Zeitstempel-Jitter
 constexpr int64_t kSilenceLag = WasapiSource::kSampleRate / 10;  // Stille erst nach 100 ms
+// Schutz vor unplausiblen Zeitstempeln (manche Treiber nach Geräteverlust/-wechsel) und
+// Zeitsprüngen: Eine "Lücke" von Stunden darf nicht als ein Block Stille im RAM landen –
+// das endete mit "Audio: bad allocation" und brach die Aufnahme ab.
+constexpr int64_t kMaxFuture = WasapiSource::kSampleRate;       // Zeitstempel > 1 s voraus
+constexpr int64_t kSilenceChunk = WasapiSource::kSampleRate;    // Stille in 1-s-Stücken
+constexpr int64_t kMaxGapFill = WasapiSource::kSampleRate * 5;  // längere Lücken kappen
 
 // Meldet Wechsel des Standardgeräts (z. B. Bluetooth-Kopfhörer verbunden).
 struct DeviceWatcher : winrt::implements<DeviceWatcher, IMMNotificationClient> {
@@ -50,6 +56,8 @@ void WasapiSource::Start(Kind kind, const std::wstring& deviceId, int64_t origin
   onData_ = std::move(onData);
   position_ = 0;
   loggedFailure_ = false;
+  loggedBadTimestamp_ = false;
+  loggedLongGap_ = false;
   stopEvent_ = CreateEventW(nullptr, TRUE, FALSE, nullptr);
   deviceChanged_ = CreateEventW(nullptr, FALSE, FALSE, nullptr);
   thread_ = std::thread([this] { Run(); });
@@ -68,18 +76,44 @@ int64_t WasapiSource::NowSample() const {
   return (now.QuadPart - originQpc_) * kSampleRate / qpcFreq_;
 }
 
+void WasapiSource::FillSilence(int64_t frames) {
+  if (frames <= 0) return;
+  if (frames > kMaxGapFill) {
+    if (!loggedLongGap_) {
+      log::Warn("{}: Lücke von {:.1f} s (Zeitsprung/Gerätewechsel) – nur {} s Stille eingefügt",
+                Name(), frames / static_cast<double>(kSampleRate), kMaxGapFill / kSampleRate);
+      loggedLongGap_ = true;
+    }
+    frames = kMaxGapFill;
+  }
+  while (frames > 0) {
+    const int64_t n = std::min(frames, kSilenceChunk);
+    onData_(nullptr, static_cast<size_t>(n));
+    frames -= n;
+  }
+}
+
 void WasapiSource::PadSilenceUntilNow() {
   int64_t target = NowSample() - kSilenceLag;
   if (target > position_) {
-    onData_(nullptr, static_cast<size_t>(target - position_));
+    FillSilence(target - position_);
     position_ = target;
   }
 }
 
 void WasapiSource::Deliver(const float* data, size_t frames, int64_t start) {
+  if (start > NowSample() + kMaxFuture) {
+    // Zeitstempel liegt in der Zukunft → unbrauchbar, Daten direkt anhängen
+    if (!loggedBadTimestamp_) {
+      log::Warn("{}: unplausibler Zeitstempel ({:.1f} s voraus) – wird ignoriert", Name(),
+                (start - NowSample()) / static_cast<double>(kSampleRate));
+      loggedBadTimestamp_ = true;
+    }
+    start = position_;
+  }
   if (start > position_ + kTolerance) {
     // Lücke (z. B. Ton setzte aus) → mit Stille füllen
-    onData_(nullptr, static_cast<size_t>(start - position_));
+    FillSilence(start - position_);
     position_ = start;
   } else if (start < position_ - kTolerance) {
     // Überlappt bereits Geliefertes (nach Stillefüllung) → Anfang abschneiden

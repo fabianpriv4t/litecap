@@ -1,6 +1,8 @@
 #include "pipeline/ReplayBuffer.h"
 
 #include <algorithm>
+#include <cwchar>
+#include <cwctype>
 #include <format>
 
 #include "output/FileNamer.h"
@@ -83,6 +85,45 @@ void ReplayBuffer::Start(CaptureSession& session, int seconds, int videoKbps, in
   sinkId_ = session.AddSink([this](const AVPacket* p) { OnPacket(p); }, /*needKeyframe=*/true);
   log::Info("Replay-Puffer aktiv: {} s, Ringdatei {:.0f} MB ({})", seconds, capacity_ / 1048576.0,
             WideToUtf8(path_.wstring()));
+}
+
+namespace {
+// Läuft unter dieser PID noch ein LiteCap-Prozess (Tray oder Selbsttest)?
+bool IsLiteCapProcess(DWORD pid) {
+  HANDLE p = OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, FALSE, pid);
+  if (!p) return false;
+  bool alive = false;
+  DWORD code = 0;
+  if (GetExitCodeProcess(p, &code) && code == STILL_ACTIVE) {
+    wchar_t buf[MAX_PATH * 2];
+    DWORD n = static_cast<DWORD>(std::size(buf));
+    if (QueryFullProcessImageNameW(p, 0, buf, &n)) {
+      std::wstring exe = std::filesystem::path(std::wstring(buf, n)).filename().wstring();
+      std::transform(exe.begin(), exe.end(), exe.begin(), ::towlower);
+      alive = exe == L"litecap.exe";
+    } else {
+      alive = true;  // im Zweifel nicht löschen
+    }
+  }
+  CloseHandle(p);
+  return alive;
+}
+} // namespace
+
+void ReplayBuffer::RemoveStaleFiles(const std::filesystem::path& dir) {
+  std::error_code ec;
+  for (const auto& entry : std::filesystem::directory_iterator(dir, ec)) {
+    const std::wstring name = entry.path().filename().wstring();
+    if (name.size() <= 12 || name.rfind(L"replay-", 0) != 0 || !name.ends_with(L".ring")) continue;
+    const std::wstring digits = name.substr(7, name.size() - 7 - 5);
+    if (digits.empty() || !std::all_of(digits.begin(), digits.end(), ::iswdigit)) continue;
+    const DWORD pid = static_cast<DWORD>(std::wcstoul(digits.c_str(), nullptr, 10));
+    if (pid == GetCurrentProcessId() || IsLiteCapProcess(pid)) continue;
+    std::error_code rec;
+    const uint64_t size = entry.file_size(rec);
+    if (std::filesystem::remove(entry.path(), rec))
+      log::Info("Alte Replay-Datei entfernt: {} ({:.0f} MB)", WideToUtf8(name), size / 1048576.0);
+  }
 }
 
 void ReplayBuffer::Stop() {

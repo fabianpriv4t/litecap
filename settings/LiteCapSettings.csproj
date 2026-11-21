@@ -15,7 +15,7 @@
     <NoWarn>$(NoWarn);WPF0001</NoWarn>
     <InvariantGlobalization>false</InvariantGlobalization>
     <SatelliteResourceLanguages>de</SatelliteResourceLanguages>
-    <Version>0.1.0</Version>
+    <Version>0.1.1</Version>
     <Product>LiteCap</Product>
     <AssemblyTitle>LiteCap – Einstellungen</AssemblyTitle>
     <Description>Einstellungen für LiteCap (ressourcenschonende Bildschirmaufnahme)</Description>

@@ -59,6 +59,7 @@ class CaptureSession {
   const std::vector<StreamInfo>& Streams() const { return streams_; }
   const VideoEncoder& Video() const { return encoder_; }
   const std::wstring& SourceName() const { return target_.name; }
+  const CaptureTarget& Target() const { return target_; }
   std::string Description() const;
 
  private:

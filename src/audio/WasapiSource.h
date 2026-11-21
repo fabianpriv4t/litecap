@@ -43,6 +43,7 @@ class WasapiSource {
   bool CaptureLoop();  // false = Gerät verloren/geändert → neu initialisieren
   void Deliver(const float* data, size_t frames, int64_t startSample);
   void PadSilenceUntilNow();
+  void FillSilence(int64_t frames);  // in 1-s-Stücken, Lücken > 5 s gekappt
   int64_t NowSample() const;
 
   Kind kind_ = Kind::Loopback;
@@ -55,6 +56,8 @@ class WasapiSource {
   HANDLE deviceChanged_ = nullptr;  // Standardgerät gewechselt (z. B. Headset eingesteckt)
   std::thread thread_;
   bool loggedFailure_ = false;
+  bool loggedBadTimestamp_ = false;
+  bool loggedLongGap_ = false;
 };
 
 } // namespace litecap

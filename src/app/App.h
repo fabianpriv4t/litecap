@@ -59,6 +59,12 @@ class App {
   bool StartReplay(bool notify);
   void StopReplay();
   void OnClipSaved(struct ClipResult* r);
+  // Nach Änderungen der Bildschirm-Anordnung: nimmt die Session noch den eingestellten
+  // Monitor auf? Windows vertauscht bei baugleichen Monitoren (z. B. ohne Monitortreiber für
+  // "True Stretched") beim Umschalten der Auflösung die DISPLAYn-Zuordnung.
+  void CheckCaptureTarget();
+  // Laufende Aufnahme/Replay mit neu ermitteltem Ziel neu starten (Aufnahme in neuer Datei).
+  void RestartPipeline(const std::wstring& reason);
 
   // Aktionen (Hotkeys / Tray-Menü)
   void ToggleRecording();

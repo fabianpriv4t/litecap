@@ -31,6 +31,11 @@ class ReplayBuffer {
              const std::filesystem::path& dir);
   void Stop();
   bool Active() const { return session_ != nullptr; }
+
+  // Löscht Ringdateien (replay-<PID>.ring) von LiteCap-Prozessen, die nicht mehr laufen.
+  // Normalerweise entfernt Windows sie beim Schließen (FILE_FLAG_DELETE_ON_CLOSE); nach
+  // Stromausfall, Absturz oder hartem Ausschalten bleiben sie aber liegen (je bis ~600 MB).
+  static void RemoveStaleFiles(const std::filesystem::path& dir);
   int Seconds() const { return seconds_; }
 
   // Speichert die gepufferten Sekunden als Clip (MP4 mit faststart / MKV).
