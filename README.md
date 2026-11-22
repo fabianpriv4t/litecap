@@ -79,7 +79,7 @@ Alle anderen GPUs nehmen in HEVC auf; die Umwandlung in AV1 passiert danach auto
 | Einstellungen | `%APPDATA%\LiteCap\config.json` (wird bei Änderung sofort neu geladen) |
 | Aufnahmen/Clips | `Videos\LiteCap` (einstellbar) |
 | Log | `%LOCALAPPDATA%\LiteCap\logs\litecap.log` |
-| Replay-Ringdatei | `%LOCALAPPDATA%\LiteCap\replay\` (wird beim Beenden gelöscht) |
+| Replay-Ringdatei | `%LOCALAPPDATA%\LiteCap\replay\` (wird beim Beenden gelöscht, Reste nach einem Absturz beim nächsten Start) |
 | Upload-Warteschlange | `%LOCALAPPDATA%\LiteCap\uploads.json` |
 | YouTube-Token, Client-Secret | Windows Credential Manager (`LiteCap/YouTube/…`), nie im Klartext |
 
@@ -168,7 +168,11 @@ src/config     JSON-Konfiguration                       settings/     WPF-Einste
 ports/         vcpkg-Overlay (AMD-AMF-Header, korrigierte Prüfsumme)
 ```
 
-## Lizenzhinweis
+## Lizenz
+
+LiteCap steht unter der **GNU General Public License v2 oder neuer** (GPL-2.0-or-later), siehe
+[LICENSE](LICENSE). Die Lizenztexte der enthaltenen Komponenten liegen im Release-ZIP im Ordner
+`lizenzen`.
 
 Der Build bindet FFmpeg mit **x264** (GPL) statisch ein; das Ergebnis unterliegt damit der
 GPL v2+. Für eine Weitergabe unter anderer Lizenz in `vcpkg.json` die Features `gpl` und `x264`
